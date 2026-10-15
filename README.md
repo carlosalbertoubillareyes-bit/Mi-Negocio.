@@ -1,2 +1,70 @@
-# Mi-Negocio.
-Ventas
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Negocio</title>
+<style>
+:root{--bg:#eef2f1;--card:#fff;--ink:#14262b;--mut:#5d7176;--line:#d5dedd;--pri:#0f766e;--pri-ink:#fff;--acc:#f2b705;--acc-ink:#14262b;--bad:#b42318;--ok:#067647}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1b1e;--card:#172629;--ink:#e8f0ef;--mut:#93a8ad;--line:#27393d;--pri:#2dd4bf;--pri-ink:#06201d;--bad:#f97066;--ok:#47cd89}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:76px}
+header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:20px;margin:0}
+main{padding:0 12px 12px;max-width:720px;margin:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+h2{font-size:16px;margin:0 0 8px}
+input,select,button,textarea{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);margin-bottom:8px}
+button{border:0;border-radius:8px;padding:11px 14px;background:var(--pri);color:var(--pri-ink);font-weight:600;cursor:pointer}
+button:disabled{opacity:.5}
+button.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.cobrar{background:var(--acc);color:var(--acc-ink);width:100%;font-size:19px;padding:15px}
+button.x{background:transparent;color:var(--bad);padding:6px 10px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:1}
+.row .fit{flex:0 0 auto}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}
+.item small,.mut{color:var(--mut)}
+.item .l{flex:1;min-width:0}
+.prod{cursor:pointer}
+.tot{font-size:30px;font-weight:800;text-align:center;margin:6px 0}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{background:var(--bg);border-radius:8px;padding:10px;font-size:14px}
+.kpi b{display:block;font-size:20px}
+.bar{height:8px;background:var(--pri);border-radius:4px;margin-top:4px}
+.low{color:var(--bad);font-weight:600}
+.ok{color:var(--ok);font-weight:600}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0)}
+nav button{flex:1;background:transparent;color:var(--mut);border-radius:0;padding:14px 2px;font-size:12px}
+nav button.on{color:var(--pri);box-shadow:inset 0 3px 0 var(--pri)}
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:9}
+#lock .card{width:100%;max-width:320px}
+.hide{display:none!important}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{padding:4px 11px;background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.badge{background:var(--acc);color:var(--acc-ink);border-radius:10px;padding:1px 7px;font-size:12px;font-weight:700}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;max-width:90%;text-align:center}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="lock" class="hide"><div class="card">
+  <h2 id="lockT">Ingresa tu PIN</h2>
+  <input id="pin" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="PIN de 4 a 8 números">
+  <button id="pinBtn" style="width:100%">Entrar</button>
+  <p class="mut" id="lockMsg"></p>
+</div></div>
+
+<header><h1 id="bizName">Mi Negocio</h1><button class="sec" id="btnLock">Bloquear</button></header>
+<main id="app"></main>
+<nav id="nav"></nav>
+<div id="toast"></div>
+
+<script>
+/* ---------- Almacenamiento ---------- */
+const KEY='negocio_calle_v2';
+let db={biz:'Mi Negocio',pin:null,salt:'',fails:0,lockUntil:0,wa:'',products:[],sales:[],purchases:[
